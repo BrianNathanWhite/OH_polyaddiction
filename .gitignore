@@ -3,5 +3,6 @@
 .RData
 .Ruserdata
 .gif
-output
+Rplots.pdf
+output/mcmc
 paper/
