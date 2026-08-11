@@ -1,0 +1,13 @@
+"class","quantity","rr","lwr95","upr95"
+"cocaine_all","Black",1.2,1.16,1.25
+"cocaine_all","Black vs White",1.02,0.98,1.07
+"cocaine_all","White",1.18,1.15,1.21
+"cocaine_no_fent","Black",1.05,1,1.09
+"cocaine_no_fent","Black vs White",1.05,1,1.1
+"cocaine_no_fent","White",1,0.97,1.03
+"psychostim_all","Black",1.73,1.56,1.94
+"psychostim_all","Black vs White",1.1,0.99,1.24
+"psychostim_all","White",1.57,1.52,1.62
+"psychostim_no_fent","Black",1.5,1.32,1.74
+"psychostim_no_fent","Black vs White",1.13,0.99,1.31
+"psychostim_no_fent","White",1.32,1.28,1.37
