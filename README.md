@@ -14,6 +14,8 @@ Run in order:
 
 Both model scripts run 1,000,000 MCMC iterations per chain (500,000 burn-in, thinned every 100th) across 3 chains with fixed seeds.
 
+A note on reproducibility: fixed seeds make reruns exactly reproducible only on the same software stack (R, nimble, platform). The published values were generated with an earlier nimble release, and the spatio-temporal model with a single chain rather than the three used here, so regenerated estimates differ from the published tables by Monte Carlo error: point estimates agree to within 0.01 and 95% credible interval endpoints to within a few hundredths, with the largest differences at interval tails where the effective sample size is smallest.
+
 ## Data
 
 - `ODRace*_2023_05_18.csv` county-level unintentional drug overdose death counts by race and year for 2010-2020, extracted 2023-05-18 from the Ohio Public Health Information Warehouse (since migrated to https://data.ohio.gov); this is the extract behind the published results. Cocaine deaths are ICD-10 code T40.5, psychostimulant deaths are ICD-10 code T43.6, and fentanyl involvement is a positive mention of select text strings on the death certificate.
