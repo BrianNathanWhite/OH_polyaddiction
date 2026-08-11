@@ -129,6 +129,11 @@ library(flextable) # make pretty tables
   # substance label -> drug class used for the manuscript and supplement maps
   map_classes <- c(cocaine = 'cocaine_all', psychostimulant = 'psychostim_all')
 
+  # accumulators for the processed posterior estimates written after the loop
+  shared_component_estimates <- list()
+  rate_ratio_estimates       <- list()
+  smr_estimates              <- list()
+
   for(substance in names(map_classes)) {
 
     samples <- pool_chains(load_samples('spatial', map_classes[substance]))
@@ -148,6 +153,11 @@ library(flextable) # make pretty tables
     u_prob <- county_year %>%
       mutate(value = colMeans(samples[, u_cols()] > 0))
 
+    shared_component_estimates[[substance]] <- county_year %>%
+      mutate(substance     = substance,
+             u_median      = u_median$value,
+             prob_positive = u_prob$value)
+
     ggsave(plot = choropleth(u_prob, 'P(U > 0)', breaks = seq(0, 1, 0.25), labels = waiver(),
                              midpoint = 0.5, limits = c(0, 1)),
            filename = paste0('figS', 6 + s_offset, '_shared_component_prob_', substance, '.png'),
@@ -162,6 +172,11 @@ library(flextable) # make pretty tables
     rr_prob <- county_year %>%
       mutate(value = colMeans(log_rr > 0))
 
+    rate_ratio_estimates[[substance]] <- county_year %>%
+      mutate(substance     = substance,
+             log_rr_median = rr_median$value,
+             prob_rr_gt1   = rr_prob$value)
+
     rr_breaks <- log(c(0.14, 0.22, 0.37, 0.61, 1, 1.65))
 
     fig_s23 <- plot_grid(choropleth(rr_median, 'White/Black\nrate ratio',
@@ -175,21 +190,26 @@ library(flextable) # make pretty tables
            filename = paste0('figS', 2 + s_offset, '_rate_ratio_', substance, '.png'),
            path = 'output/figures', width = 20, height = 5, dpi = 'retina', bg = 'white')
 
-    # figure S4/S5: log SMR by county, year and race
+    # figure S4/S5: log SMR by county, year and race (1 = White, 2 = Black)
     smr_breaks <- -1:4
 
-    smr_by_race <- function(r, race_label) {
+    smr_median <- map(1:2, function(r) county_year %>%
+                        mutate(value = apply(log(samples[, lambda_cols(r)]), 2, median)))
 
-      smr_median <- county_year %>%
-        mutate(value = apply(log(samples[, lambda_cols(r)]), 2, median))
+    smr_estimates[[substance]] <- map2_dfr(smr_median, c('White', 'Black'),
+                                           ~mutate(.x, race = .y)) %>%
+      mutate(substance = substance) %>%
+      rename(log_smr_median = value)
 
-      choropleth(smr_median, paste0('SMR\n(', race_label, ')'),
+    smr_map <- function(r, race_label) {
+
+      choropleth(smr_median[[r]], paste0('SMR\n(', race_label, ')'),
                  breaks = smr_breaks, labels = round(exp(smr_breaks), 2),
-                 limits = range(c(smr_breaks, smr_median$value)))
+                 limits = range(c(smr_breaks, smr_median[[r]]$value)))
 
     }
 
-    fig_s45 <- plot_grid(smr_by_race(1, 'White'), smr_by_race(2, 'Black'), ncol = 2)
+    fig_s45 <- plot_grid(smr_map(1, 'White'), smr_map(2, 'Black'), ncol = 2)
 
     ggsave(plot = fig_s45,
            filename = paste0('figS', 4 + s_offset, '_smr_', substance, '.png'),
@@ -198,6 +218,19 @@ library(flextable) # make pretty tables
     rm(samples, log_rr)
 
   }
+
+# WRITE POSTERIOR ESTIMATES (PROCESSED MCMC OUTPUT FOR REUSE WITHOUT REFITTING)
+
+  dir.create('output/estimates', recursive = T, showWarnings = F)
+
+  bind_rows(shared_component_estimates) %>%
+    write.csv('output/estimates/spatial_shared_component.csv', row.names = F)
+
+  bind_rows(rate_ratio_estimates) %>%
+    write.csv('output/estimates/spatial_rate_ratio_white_black.csv', row.names = F)
+
+  bind_rows(smr_estimates) %>%
+    write.csv('output/estimates/spatial_smr.csv', row.names = F)
 
 # CREATE FIGURE S1: COUNTY REFERENCE MAP WITH PERTINENT CITIES (FOR SUPPLEMENT)
 

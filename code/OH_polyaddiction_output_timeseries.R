@@ -148,6 +148,13 @@ library(flextable) # make pretty tables
          filename = 'fig3_smr_psychostimulant.png', path = 'output/figures',
          width = 8, height = 4.5, dpi = 'retina', bg = 'white')
 
+# WRITE POSTERIOR SMR ESTIMATES (PROCESSED MCMC OUTPUT FOR REUSE WITHOUT REFITTING)
+
+  dir.create('output/estimates', recursive = T, showWarnings = F)
+
+  imap_dfr(mcmc_timeseries, ~smr_summary(.x, .y)) %>%
+    write.csv('output/estimates/timeseries_smr.csv', row.names = F)
+
 # CREATE TABLE 1: RATE RATIOS BY ANNUAL CHANGE AND RACE (FOR MANUSCRIPT)
 
   dir.create('output/tables', recursive = T, showWarnings = F)

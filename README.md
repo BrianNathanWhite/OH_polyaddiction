@@ -26,7 +26,8 @@ Both model scripts run 1,000,000 MCMC iterations per chain (500,000 burn-in, thi
 
 ## Output
 
-- `output/mcmc/` posterior samples, one file per model and drug class (not tracked; the spatial files run to a few hundred MB each)
+- `output/mcmc/` raw posterior samples, one file per model and drug class (not tracked; the spatial files run to a few hundred MB each)
 - `output/diagnostics/` trace plots with Rhat and effective sample sizes
+- `output/estimates/` processed posterior summaries (state SMRs by race and year; county-level shared component, SMRs and White/Black rate ratios) so the estimates can be reused without refitting
 - `output/figures/` manuscript figures (`fig1`-`fig5`) and supplement figures (`figS1`-`figS7`)
 - `output/tables/` Table 1, Table S1 and the crude state rates as csv, with docx versions of the tables
