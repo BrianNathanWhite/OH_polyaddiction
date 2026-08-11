@@ -118,8 +118,9 @@ library(flextable) # make pretty tables
                            labels   = labels,
                            name     = fill_lab) +
       theme_void() +
-      theme(strip.text  = element_text(size = 9, face = 'bold'),
-            legend.title = element_text(size = 9))
+      theme(strip.text   = element_text(size = 9, face = 'bold'),
+            legend.title = element_text(size = 9),
+            plot.margin  = margin(5.5, 15, 5.5, 5.5)) # right margin keeps the legend title clear of the edge
 
   }
 
