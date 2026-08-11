@@ -65,8 +65,9 @@ library(flextable) # make pretty tables
     pivot_longer(-c(race, year), names_to = 'class', values_to = 'rate') %>%
     mutate(race = factor(race, levels = c('Black', 'White')))
 
-  # function to make one substance panel of figure 1
-  fig1_panel <- function(class_levels) {
+  # function to make one substance panel of figure 1; the panel label is a ggplot
+  # tag so it gets its own layout space rather than overprinting the facet strip
+  fig1_panel <- function(class_levels, tag) {
 
     crude_rates %>%
       filter(class %in% class_levels) %>%
@@ -76,21 +77,22 @@ library(flextable) # make pretty tables
       facet_wrap(~race) +
       scale_linetype_manual(values = c('solid', 'dotted')) +
       scale_x_continuous(breaks = seq(min(years), max(years), 2)) +
-      labs(x = 'Year', y = 'Mortality Rate', linetype = NULL) +
+      labs(x = 'Year', y = 'Mortality Rate', linetype = NULL, tag = tag) +
       theme_bw() +
       theme(legend.position        = 'inside',
             legend.position.inside = c(0.02, 0.98),
             legend.justification   = c(0, 1),
             legend.background      = element_blank(),
             legend.key.height      = unit(0.35, 'cm'),
-            panel.grid             = element_blank())
+            panel.grid             = element_blank(),
+            plot.tag               = element_text(face = 'bold', size = 13))
 
   }
 
-  fig1 <- plot_grid(fig1_panel(c('All cocaine', 'Cocaine not involving fentanyl')),
-                    fig1_panel(c('All psychostimulant', 'Psychostimulant not involving fentanyl')),
-                    ncol   = 1,
-                    labels = c('(A)', '(B)'))
+  fig1 <- plot_grid(fig1_panel(c('All cocaine', 'Cocaine not involving fentanyl'), '(A)'),
+                    fig1_panel(c('All psychostimulant', 'Psychostimulant not involving fentanyl'), '(B)'),
+                    ncol  = 1,
+                    align = 'v')
 
   ggsave(plot = fig1, filename = 'fig1_state_rates.png', path = 'output/figures',
          width = 7, height = 8, dpi = 'retina', bg = 'white')
