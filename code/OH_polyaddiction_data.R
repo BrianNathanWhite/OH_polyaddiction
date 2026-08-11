@@ -7,27 +7,32 @@
 library(tidyverse) # data manipulation
 library(sf)        # county shape file handling
 library(spdep)     # poly2nb, nb2WB
+library(maps)      # county polygons for the adjacency structure
 library(tigris)    # pull OH county shape file from US Census
 
 # LOAD RAW WAREHOUSE EXTRACTS
 
-  # county-level unintentional drug overdose death counts by race and year
-  # source: Ohio Public Health Information Warehouse, https://publicapps.odh.ohio.gov/EDW/DataCatalog
+  # county-level unintentional drug overdose death counts by race and year,
+  # extracted 2023-05-18 (the pull used for the published analysis)
+  # source: Ohio Public Health Information Warehouse (since migrated to https://data.ohio.gov)
   # extraction procedure: data/metadata/DataPull_081621.pdf
   # cocaine deaths are ICD-10 T40.5, psychostimulant deaths are ICD-10 T43.6, and
   # fentanyl involvement is a positive mention of select text strings on the death certificate
-  od_cocaine_all     <- read.csv('data/ODRaceCocaine_07-19.csv')                 # any cocaine involvement
-  od_cocaine_fent    <- read.csv('data/ODRaceFentanylCocaine_07-19.csv')         # cocaine and fentanyl jointly
-  od_psychostim_all  <- read.csv('data/ODRacePsychostimulant_07-19.csv')         # any psychostimulant involvement
-  od_psychostim_fent <- read.csv('data/ODRaceFentanylPsychostimulant_07-19.csv') # psychostimulant and fentanyl jointly
-  od_fentanyl        <- read.csv('data/ODRaceFentanyl_07-19.csv')                # any fentanyl involvement (crude context rates only)
+  od_cocaine_all     <- read.csv('data/ODRaceCocaine_2023_05_18.csv')                 # any cocaine involvement
+  od_cocaine_fent    <- read.csv('data/ODRaceFentanylCocaine_2023_05_18.csv')         # cocaine and fentanyl jointly
+  od_psychostim_all  <- read.csv('data/ODRacePsychostimulant_2023_05_18.csv')         # any psychostimulant involvement
+  od_psychostim_fent <- read.csv('data/ODRaceFentanylPsychostimulant_2023_05_18.csv') # psychostimulant and fentanyl jointly
+
+  # any fentanyl involvement, from the earlier 2021-08-16 pull; used only for the
+  # crude context rates in the results text and ends in 2019
+  od_fentanyl <- read.csv('data/ODRaceFentanyl_07-19.csv')
 
   # 2010 statewide overdose death counts not involving fentanyl by NCHS age group (all races)
   baseline_cocaine    <- read.csv('data/baseline_cocaine_no_fent.csv')
   baseline_psychostim <- read.csv('data/baseline_psychostim_no_fent.csv')
 
   # population counts by year, county, race and NCHS age group
-  population <- read.csv('data/year_county_race_age.csv')
+  population <- read.csv('data/year_county_race_age_2023_05_18.csv')
 
 # CLEAN WAREHOUSE EXTRACTS
 
@@ -57,10 +62,10 @@ library(tigris)    # pull OH county shape file from US Census
     left_join(clean_od(od_psychostim_all, 'psychostim_all'), by = c('race', 'county', 'year', 'population')) %>%
     left_join(clean_od(od_psychostim_fent, 'psychostim_fent'), by = c('race', 'county', 'year', 'population'))
 
-  # analysis years: the study period starts in 2010 (the standardization year) and
-  # ends at the latest year in the extract, so the pipeline scales when the
-  # extract is refreshed through 2020
-  years <- od_drug %>% filter(year >= 2010) %>% pull(year) %>% unique() %>% sort()
+  # analysis years: the study period is 2010 (the standardization year) through
+  # 2020, matching the manuscript; the upper cap guards against future extracts
+  # that extend past the study period
+  years <- od_drug %>% filter(year >= 2010 & year <= 2020) %>% pull(year) %>% unique() %>% sort()
 
   # deaths not involving fentanyl are the class total minus the joint fentanyl counts
   od_drug <- od_drug %>%
@@ -163,7 +168,18 @@ library(tigris)    # pull OH county shape file from US Census
   stopifnot(identical(shape_county_OH$NAME, counties))
 
   # queen-contiguity neighborhood structure in the format nimble's dcar_normal expects
-  W <- nb2WB(poly2nb(shape_county_OH))
+  # approach: built from the maps-package county polygons, matching the adjacency used
+  # for the published analysis (via the now-retired maptools); the Census cartographic
+  # boundaries differ at the Auglaize/Darke/Mercer/Shelby corner point, so the Census
+  # shape file above is used for mapping only
+  county_polygons <- st_as_sf(map('county', 'Ohio', plot = F, fill = T)) %>%
+    mutate(county = str_remove(ID, '^ohio,')) %>%
+    arrange(county)
+
+  # check: polygon order matches the analysis data
+  stopifnot(identical(county_polygons$county, tolower(counties)))
+
+  W <- nb2WB(poly2nb(county_polygons))
 
   # check: all counties have at least one neighbor
   stopifnot(all(W$num > 0))
