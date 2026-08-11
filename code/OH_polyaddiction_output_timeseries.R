@@ -30,7 +30,9 @@ library(flextable) # make pretty tables
 
   }
 
-  mcmc_timeseries <- map(set_names(class_names), ~load_samples('timeseries', .x))
+  # purrr:: is explicit because maps::map masks purrr::map when the data script
+  # ran earlier in the same session
+  mcmc_timeseries <- purrr::map(set_names(class_names), ~load_samples('timeseries', .x))
 
   # function to pool the chains of a nimbleMCMC samples list into one matrix
   pool_chains <- function(samples) do.call(rbind, samples)

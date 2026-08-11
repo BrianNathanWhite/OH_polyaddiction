@@ -193,8 +193,10 @@ library(flextable) # make pretty tables
     # figure S4/S5: log SMR by county, year and race (1 = White, 2 = Black)
     smr_breaks <- -1:4
 
-    smr_median <- map(1:2, function(r) county_year %>%
-                        mutate(value = apply(log(samples[, lambda_cols(r)]), 2, median)))
+    # purrr:: is explicit because maps::map masks purrr::map when the data script
+    # ran earlier in the same session
+    smr_median <- purrr::map(1:2, function(r) county_year %>%
+                               mutate(value = apply(log(samples[, lambda_cols(r)]), 2, median)))
 
     smr_estimates[[substance]] <- map2_dfr(smr_median, c('White', 'Black'),
                                            ~mutate(.x, race = .y)) %>%
