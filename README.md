@@ -16,14 +16,13 @@ Both model scripts run 1,000,000 MCMC iterations per chain (500,000 burn-in, thi
 
 ## Data
 
-- `ODRace*.csv` county-level unintentional drug overdose death counts by race and year from the Ohio Public Health Information Warehouse (https://publicapps.odh.ohio.gov/EDW/DataCatalog). Cocaine deaths are ICD-10 code T40.5, psychostimulant deaths are ICD-10 code T43.6, and fentanyl involvement is a positive mention of select text strings on the death certificate.
+- `ODRace*_2023_05_18.csv` county-level unintentional drug overdose death counts by race and year for 2010-2020, extracted 2023-05-18 from the Ohio Public Health Information Warehouse (since migrated to https://data.ohio.gov); this is the extract behind the published results. Cocaine deaths are ICD-10 code T40.5, psychostimulant deaths are ICD-10 code T43.6, and fentanyl involvement is a positive mention of select text strings on the death certificate.
+- `ODRaceFentanyl_07-19.csv` fentanyl-involved death counts from the earlier 2021-08-16 extract; used only for the crude fentanyl context rates and ends in 2019.
 - `baseline_cocaine_no_fent.csv`, `baseline_psychostim_no_fent.csv` 2010 statewide overdose death counts not involving fentanyl by NCHS age group; these provide the standard rates for the indirect age standardization.
-- `year_county_race_age.csv` population denominators by year, county, race and NCHS age group.
-- `shape_county_OH.Rda` Ohio county boundaries (US Census 2020 cartographic boundary file, pulled via tigris).
+- `year_county_race_age_2023_05_18.csv` population denominators by year, county, race and NCHS age group.
+- `shape_county_OH.Rda` Ohio county boundaries for mapping (US Census 2020 cartographic boundary file, pulled via tigris); the model adjacency structure is instead built from the maps-package county polygons, matching the published analysis.
 - `data_for_analysis.Rda` the analysis data set produced by `OH_polyaddiction_data.R`.
 - `metadata/` warehouse documentation: the extraction procedure, mortality data dictionary and warehouse data guide.
-
-Note: the committed warehouse extract currently ends in 2019. The published analysis covers 2010-2020; the pipeline derives its year range from the data, so the full study period reproduces once the extract is refreshed through 2020.
 
 ## Output
 
