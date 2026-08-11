@@ -2,6 +2,10 @@
 
 Analysis code and data for "The impact of fentanyl on state- and county-level psychostimulant and cocaine overdose death rates by race in Ohio from 2010 to 2020: a time series and spatiotemporal analysis" (Estadt et al., *Harm Reduction Journal*, 2024, https://doi.org/10.1186/s12954-024-00936-9): Bayesian time series and spatiotemporal models of standardized mortality ratios (SMRs) for unintentional overdose deaths involving cocaine and psychostimulants, with and without fentanyl involvement, for Black and White populations across Ohio's 88 counties.
 
+![Shared spatio-temporal component of psychostimulant-involved overdose death rates in Ohio counties, 2010-2020](output/figures/fig5_shared_component_psychostimulant.png)
+
+*The shared spatio-temporal component of psychostimulant-involved overdose death rates in Ohio's 88 counties, 2010-2020 (manuscript Figure 5). As the epidemic grew, psychostimulant overdose mortality concentrated in rural southern and Appalachian Ohio, in contrast to cocaine-involved mortality, which concentrated in the urban centers.*
+
 ## Code
 
 Run in order:
