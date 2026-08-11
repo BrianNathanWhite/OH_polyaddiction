@@ -1,6 +1,7 @@
 # FIT COUNTY-LEVEL SPATIO-TEMPORAL SMR MODEL FOR THE FOUR DRUG CLASSES #
-# model specified in section 1.2 of the statistical supplement, adapted from #
-# Kline, Pan and Hepler (2021, Epidemiology 32:295-302) #
+# model of section 1.2 of the statistical supplement, adapted from #
+# Kline, Pan and Hepler (2021, Epidemiology 32:295-302), as run for the #
+# published analysis except with 3 chains rather than 1 #
 # BRIAN N. WHITE #
 # 2026-08-11 #
 

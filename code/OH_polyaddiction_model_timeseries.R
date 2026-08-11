@@ -1,5 +1,7 @@
 # FIT STATE-LEVEL TIME SERIES SMR MODEL FOR THE FOUR DRUG CLASSES #
-# model specified in section 1.1 of the statistical supplement #
+# model of section 1.1 of the statistical supplement, exactly as run for the #
+# published analysis: the AR(1) heterogeneity is centered to sum to zero within #
+# race, AR parameters are uniform(-1, 1) and precisions are gamma(0.1, 0.1) #
 # BRIAN N. WHITE #
 # 2026-08-11 #
 
@@ -34,11 +36,12 @@ code_timeseries <- nimbleCode({
 
     O[i] ~ dpois(E[i]*lambda[i])
 
-    log(lambda[i]) <- inprod(X[i, 1:p], beta[1:p]) + eps[race_idx[i], year_idx[i]]
+    log(lambda[i]) <- inprod(X[i, 1:p], beta[1:p]) + eps_star[race_idx[i], year_idx[i]]
 
   }
 
-  # race-specific residual heterogeneity with AR(1) temporal structure (supplement eq. 5)
+  # race-specific residual heterogeneity with AR(1) temporal structure (supplement
+  # eq. 5), centered to sum to zero over time within race as in the published run
   for(r in 1:2) {
 
     eps[r, 1] ~ dnorm(0, tau = tau_eps[r])
@@ -49,10 +52,16 @@ code_timeseries <- nimbleCode({
 
     }
 
+    for(t in 1:T) {
+
+      eps_star[r, t] <- eps[r, t] - mean(eps[r, 1:T])
+
+    }
+
   }
 
-  # priors: flat on fixed effects, uniform(0,1) on AR parameters and
-  # gamma(0.5, 0.5) on precisions, i.e. inverse gamma(0.5, 0.5) on variances
+  # priors as in the published run: flat on fixed effects, uniform(-1, 1) on AR
+  # parameters and gamma(0.1, 0.1) on precisions
   for(j in 1:p) {
 
     beta[j] ~ dflat()
@@ -61,8 +70,8 @@ code_timeseries <- nimbleCode({
 
   for(r in 1:2) {
 
-    phi[r] ~ dunif(0, 1)
-    tau_eps[r] ~ dgamma(0.5, 0.5)
+    phi[r] ~ dunif(-1, 1)
+    tau_eps[r] ~ dgamma(0.1, 0.1)
 
   }
 
@@ -85,7 +94,7 @@ code_timeseries <- nimbleCode({
   inits <- list(beta    = rep(0, p),
                 eps     = matrix(0, 2, T),
                 phi     = rep(0.5, 2),
-                tau_eps = rep(1, 2))
+                tau_eps = rep(0.5, 2))
 
   monitors <- c('beta', 'lambda', 'phi', 'tau_eps')
 
